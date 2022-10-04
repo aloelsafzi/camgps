@@ -95,7 +95,7 @@
                             let exGpLa = EXIF.getTag(this, 'GPSLatitude')
                             let exGpLo = EXIF.getTag(this, 'GPSLongitude')
                             const latDec = exGpLa[0] + exGpLa[1] / 60 + exGpLa[2] / 3600;
-                            const longDec = (exGpLa[0] + exGpLa[1] / 60 + exGpLa[2] / 3600) * -1;
+                            const longDec = (exGpLo[0] + exGpLo[1] / 60 + exGpLo[2] / 3600) * -1;
 
                             const pGPS = {
                                 lat: latDec.toFixed(6),
@@ -104,7 +104,8 @@
 
 
                             const gpsI = document.getElementById('gpsI');
-                            gpsI.innerHTML = JSON.stringify(pGPS)
+                            const text1 = `lat : ${pGPS.lat} long : ${pGPS.long} `
+                            gpsI.innerHTML = text1
 
 
                             EXIF.getData(file, function () {
@@ -171,7 +172,8 @@
                         .bindPopup('Lokasi Anda Saat ini')
                         .openPopup();
                     const gpsW = document.getElementById('gpsW');
-                    gpsW.innerHTML = JSON.stringify(loc.coords)
+                    const txt = `lat : ${loc.coords.latitude} long :  ${loc.coords.longitude}`
+                    gpsW.innerHTML = txt
                 },
                 (err) => {
                     console.log(err)
