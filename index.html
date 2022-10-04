@@ -6,6 +6,27 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cam GPS</title>
+    <style>
+        .con_btn {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+
+        .con_cam {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 10px;
+        }
+
+        #map {
+            height: 400px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.1/dist/leaflet.css"
+        integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js"
+        integrity="sha256-NDI0K41gVbWqfkkaHj15IzU7PtMoelkzyKp8TOaFQ3s=" crossorigin=""></script>
 </head>
 
 <body>
@@ -16,6 +37,20 @@
     <div class="preview">
         <p>No files currently selected for upload</p>
     </div>
+    <div id="allMetaDataSpan1">
+
+    </div>
+    <div class="con_btn">
+        <button id="start-camera">Start Camera</button>
+        <button id="click-photo">Click Photo</button>
+    </div>
+    <div class="con_cam">
+        <video id="video" width="320" height="240" autoplay></video>
+        <canvas id="canvas" width="320" height="240"></canvas>
+    </div>
+    <div id="map"></div>
+
+
     <div id="allMetaDataSpan">
 
     </div>
@@ -50,8 +85,12 @@
                             image.src = URL.createObjectURL(file);
                             image.width = 200
 
+                            const exGpL = EXIF.getTag(this, 'GPSLatitude')
+
+                            console.log(exGpL)
+
                             EXIF.getData(file, function () {
-                                let allMetaDataSpan = document.getElementById("allMetaDataSpan");
+                                let allMetaDataSpan = document.getElementById("allMetaDataSpan1");
                                 allMetaDataSpan.innerHTML = JSON.stringify(this, null, "\t");
                             });
 
@@ -93,7 +132,98 @@
             function validFileType(file) {
                 return fileTypes.includes(file.type);
             }
+
+            let camera_button = document.querySelector("#start-camera");
+            let video = document.querySelector("#video");
+            let click_button = document.querySelector("#click-photo");
+            let canvas = document.querySelector("#canvas");
+            let allMetaDataSpan = document.getElementById('allMetaDataSpan')
+            let location = {}
+
+            navigator.geolocation.getCurrentPosition(
+                (loc) => {
+                    location = loc.coords
+                    var map = L.map('map').setView([location.latitude, location.longitude], 13);
+
+                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+
+                    L.marker([location.latitude, location.longitude]).addTo(map)
+                        .bindPopup('Lokasi Anda Saat ini')
+                        .openPopup();
+                },
+                (err) => {
+                    console.log(err)
+                }
+            )
+
+            camera_button.addEventListener('click', async function () {
+                let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                video.srcObject = stream;
+            });
+
+            click_button.addEventListener('click', async () => {
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                let image_data_url = canvas.toDataURL('image/jpeg');
+
+                // data url of the image
+                // console.log(image_data_url)
+
+                const track = video.srcObject.getVideoTracks()[0];
+                let imageCapture = new ImageCapture(track);
+                imageCapture.takePhoto().then((blob) => {
+                    let filename = Date.now();
+                    const newFile = new File([blob], `${filename}.jpg`, { type: "image/jpg" });
+                    EXIF.getData(newFile, function () {
+                        console.log(location.latitude)
+                        this.exifdata = {
+                            lastModified: this.lastModified,
+                            lastModifiedDate: this.lastModifiedDate,
+                            name: this.name,
+                            size: this.size,
+                            type: this.type,
+                            glocation: {
+                                latitude: location.latitude,
+                                longitude: location.longitude,
+                                accuracy: location.accuracy
+                            }
+                        }
+                        const make = EXIF.getAllTags(this);
+                        // console.log(this.EXIF.getAllTags(newFile))
+                        console.log("All data", this);
+                        let allMetaDataSpan = document.getElementById("allMetaDataSpan");
+                        allMetaDataSpan.innerHTML = JSON.stringify(make, null, "\t");
+                    });
+                });
+
+            });
+
         })
+
+        function detectMob() {
+            const toMatch = [
+                /Android/i,
+                /webOS/i,
+                /iPhone/i,
+                /iPad/i,
+                /iPod/i,
+                /BlackBerry/i,
+                /Windows Phone/i
+            ];
+
+            return toMatch.some((toMatchItem) => {
+                return navigator.userAgent.match(toMatchItem);
+            });
+        }
+
+        function urltoFile(url, filename, mimeType) {
+            return (fetch(url)
+                .then(function (res) { return res.arrayBuffer(); })
+                .then(function (buf) { return new File([buf], filename, { type: mimeType }); })
+            );
+        }
+
     </script>
 </body>
 
