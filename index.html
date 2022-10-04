@@ -40,6 +40,13 @@
     <div id="allMetaDataSpan1">
 
     </div>
+
+    <h1>GPS Gambar</h1>
+    <div id="gpsI"></div>
+
+    <h1>GPS Web</h1>
+    <div id="gpsW"></div>
+
     <div class="con_btn">
         <button id="start-camera">Start Camera</button>
         <button id="click-photo">Click Photo</button>
@@ -85,9 +92,20 @@
                             image.src = URL.createObjectURL(file);
                             image.width = 200
 
-                            const exGpL = EXIF.getTag(this, 'GPSLatitude')
+                            let exGpLa = EXIF.getTag(this, 'GPSLatitude')
+                            let exGpLo = EXIF.getTag(this, 'GPSLongitude')
+                            const latDec = exGpLa[0] + exGpLa[1] / 60 + exGpLa[2] / 3600;
+                            const longDec = (exGpLa[0] + exGpLa[1] / 60 + exGpLa[2] / 3600) * -1;
 
-                            console.log(exGpL)
+                            const pGPS = {
+                                lat: latDec.toFixed(6),
+                                long: longDec.toFixed(6)
+                            }
+
+
+                            const gpsI = document.getElementById('gpsI');
+                            gpsI.innerHTML = JSON.stringify(pGPS)
+
 
                             EXIF.getData(file, function () {
                                 let allMetaDataSpan = document.getElementById("allMetaDataSpan1");
@@ -152,6 +170,8 @@
                     L.marker([location.latitude, location.longitude]).addTo(map)
                         .bindPopup('Lokasi Anda Saat ini')
                         .openPopup();
+                    const gpsW = document.getElementById('gpsW');
+                    gpsW.innerHTML = JSON.stringify(loc.coords)
                 },
                 (err) => {
                     console.log(err)
