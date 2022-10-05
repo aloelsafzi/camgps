@@ -87,51 +87,47 @@
                         const listItem = document.createElement('li');
                         const para = document.createElement('p');
                         console.log(file)
-                        if (validFileType(file)) {
-                            para.textContent = `File name ${file.name}, file size ${returnFileSize(file.size)}.`;
-                            const image = document.createElement('img');
-                            image.src = URL.createObjectURL(file);
-                            image.width = 200
+
+                        para.textContent = `File name ${file.name}, file size ${returnFileSize(file.size)}.`;
+                        const image = document.createElement('img');
+                        image.src = URL.createObjectURL(file);
+                        image.width = 200
 
 
-                            EXIF.getData(file, function () {
-                                let exGpLa = EXIF.getTag(this, 'GPSLatitude')
-                                let exGpLo = EXIF.getTag(this, 'GPSLongitude')
-                                let exGpsLaRef = EXIF.getTag(this, 'GPSLatitudeRef')
+                        EXIF.getData(file, function () {
+                            let exGpLa = EXIF.getTag(this, 'GPSLatitude')
+                            let exGpLo = EXIF.getTag(this, 'GPSLongitude')
+                            let exGpsLaRef = EXIF.getTag(this, 'GPSLatitudeRef')
 
-                                let exGpsLoRef = EXIF.getTag(this, 'GPSLongitudeRef')
+                            let exGpsLoRef = EXIF.getTag(this, 'GPSLongitudeRef')
 
-                                let latDec = (exGpLa[0] + exGpLa[1] / 60 + exGpLa[2] / 3600);
-                                let longDec = (exGpLo[0] + exGpLo[1] / 60 + exGpLo[2] / 3600);
+                            let latDec = (exGpLa[0] + exGpLa[1] / 60 + exGpLa[2] / 3600);
+                            let longDec = (exGpLo[0] + exGpLo[1] / 60 + exGpLo[2] / 3600);
 
-                                if (exGpsLaRef === "S" || exGpsLaRef === "W") {
-                                    latDec = latDec * -1;
-                                }
+                            if (exGpsLaRef === "S" || exGpsLaRef === "W") {
+                                latDec = latDec * -1;
+                            }
 
-                                if (exGpsLoRef === "S" || exGpsL0Ref === "W") {
-                                    longDec = longDec * -1;
-                                }
+                            if (exGpsLoRef === "S" || exGpsL0Ref === "W") {
+                                longDec = longDec * -1;
+                            }
 
-                                const pGPS = {
-                                    lat: latDec.toFixed(6),
-                                    long: longDec.toFixed(6)
-                                }
+                            const pGPS = {
+                                lat: latDec.toFixed(6),
+                                long: longDec.toFixed(6)
+                            }
 
 
-                                const gpsI = document.getElementById('gpsI');
-                                const text1 = `lat : ${pGPS.lat} long : ${pGPS.long} `
-                                gpsI.innerHTML = text1
+                            const gpsI = document.getElementById('gpsI');
+                            const text1 = `lat : ${pGPS.lat} long : ${pGPS.long} `
+                            gpsI.innerHTML = text1
 
-                                let allMetaDataSpan = document.getElementById("allMetaDataSpan1");
-                                allMetaDataSpan.innerHTML = JSON.stringify(this, null, "\t");
-                            });
+                            let allMetaDataSpan = document.getElementById("allMetaDataSpan1");
+                            allMetaDataSpan.innerHTML = JSON.stringify(this, null, "\t");
+                        });
 
-                            listItem.appendChild(image);
-                            listItem.appendChild(para);
-                        } else {
-                            para.textContent = `File name ${file.name}: Not a valid file type. Update your selection.`;
-                            listItem.appendChild(para);
-                        }
+                        listItem.appendChild(image);
+                        listItem.appendChild(para);
 
                         list.appendChild(listItem);
                     }
