@@ -104,13 +104,13 @@
                             let latDec = (exGpLa[0] + exGpLa[1] / 60 + exGpLa[2] / 3600);
                             let longDec = (exGpLo[0] + exGpLo[1] / 60 + exGpLo[2] / 3600);
 
-                            // if (exGpsLaRef === "S" || exGpsLaRef === "W") {
-                            //     latDec = latDec * -1;
-                            // }
+                            if (exGpsLaRef === "S" || exGpsLaRef === "W") {
+                                latDec = latDec * -1;
+                            }
 
-                            // if (exGpsLoRef === "S" || exGpsL0Ref === "W") {
-                            //     longDec = longDec * -1;
-                            // }
+                            if (exGpsLoRef === "S" || exGpsLoRef === "W") {
+                                longDec = longDec * -1;
+                            }
 
                             const pGPS = {
                                 lat: latDec.toFixed(6),
